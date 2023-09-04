@@ -10,24 +10,32 @@ from selenium import webdriver
 
 # imports de bibliotecas
 
-def salvar_dados_em_csv(carro):
-    arquivo_csv = "dataset_fichas.csv"
+lista_de_carros = []
+nome_arquivo = 'ficha_carros_database.csv'
 
-    arquivo_existe = os.path.exists(arquivo_csv)
+def salvar_dados_em_csv(lista_de_carros, nome_arquivo):
+    with open(nome_arquivo, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-    with open(arquivo_csv, mode='a', newLine='') as file:
-        fieldnames = carro.__dict__.keys()
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        # Escreva os dados dos carros com instruções SQL INSERT
+        for carro in lista_de_carros:
+            insert_sql = ('INSERT INTO `monaco`.`tabela_carros`(`id`,`marca`,`modelo`,`ano`,`motor`,`tipo`,'
+                          f'`valvulas`,`alimentacao`,`posicao`,`combustivel`,`potencia_cv`,`cilindradas`,`torque`,'
+                          f'`direcao`,`tracao`,`transmissao`,`velocidade_max`,`_0_100`,`consumo_cidade`,'
+                          f'`consumo_estrada`,`suspensao_dianteira`,`suspensao_traseira`,`freio_dianteiro`,'
+                          f'`freio_traseiro`,`roda`,`pneu`,`comprimento`,`entre_eixos`,`altura`,`largura`,`peso`,'
+                          f'`carga_util`,`porta_malas`,`tanque`,`portas`,`foto`) VALUES(')
+            insert_sql += f"'{carro.id}', '{carro.marca}', '{carro.modelo}', '{carro.ano}', '{carro.motor}', '{carro.tipo}', '{carro.valvulas}', '{carro.alimentacao}', '{carro.posicao}', '{carro.combustivel}', '{carro.potencia_cv}', '{carro.cilindradas}', '{carro.torque}', '{carro.direcao}', '{carro.tracao}', '{carro.transmissao}', '{carro.velocidade_max}', '{carro._0_100}', '{carro.consumo_cidade}', '{carro.consumo_estrada}', '{carro.suspensao_dianteira}', '{carro.suspensao_traseira}', '{carro.freio_dianteiro}', '{carro.freio_traseiro}', '{carro.roda}', '{carro.pneu}', '{carro.comprimento}', '{carro.entre_eixos}', '{carro.altura}', '{carro.largura}', '{carro.peso}', '{carro.carga_util}', '{carro.porta_malas}', '{carro.tanque}', '{carro.portas}', '{carro.foto}'"
+            insert_sql += ');'
 
-        if not arquivo_existe:
-            writer.writeheader()
+            # Escreva a instrução SQL INSERT no arquivo CSV
+            writer.writerow([insert_sql])
 
-        writer.writerow(vars(carro))
 
 
 # Configurando modelo carro
 class FichaTecnicaCarro:
-    def __init__(self, marca='', modelo='', ano='0', motor='', tipo='',
+    def __init__(self, id=0, marca='', modelo='', ano='0', motor='', tipo='',
                  valvulas='', alimentacao='', posicao='', combustivel='',
                  potencia_cv='0', cilindradas='0', torque='0',
                  direcao='', tracao='', transmissao='',
@@ -38,6 +46,7 @@ class FichaTecnicaCarro:
                  entre_eixos='0', altura='0', largura='0', peso='0',
                  carga_util='0', porta_malas='0', tanque='0',
                  portas='0', foto=''):
+        self.id = id
         self.marca = marca
         self.modelo = modelo
         self.ano = ano
@@ -122,7 +131,7 @@ def escaralhando(url):
         'Posição': 'posicao',
         'Combustível': 'combustivel',
         'Potência (cv)': 'potencia_cv',
-        'Cilindradas': 'cilindradas',
+        'Cilindradas (cm3)': 'cilindradas',
         'Torque (Kgf.m)': 'torque',
         'Direção': 'direcao',
         'Tração': 'tracao',
@@ -131,8 +140,8 @@ def escaralhando(url):
         'Tempo 0-100Km/h': '_0_100',
         'Consumo cidade (Km/L)': 'consumo_cidade',
         'Consumo estrada (Km/L)': 'consumo_estrada',
-        'Suspensão Dianteira': 'suspensao_dianteira',
-        'Suspensão Traseira': 'suspensao_traseira',
+        'Suspensão dianteira': 'suspensao_dianteira',
+        'Suspensão traseira': 'suspensao_traseira',
         'Freio dianteiro': 'freio_dianteiro',
         'Freio traseiro': 'freio_traseiro',
         'Roda': 'roda',
@@ -165,17 +174,34 @@ def escaralhando(url):
                 setattr(carro, atributo, valor)
         print(carro)
 
-    carro.marca = 'Honda'
+    # Pegando valor das dimensões do veiculo
+    info_spans = soup.find_all('span', class_='info')
+
+    for info_span in info_spans:
+        titulo_tag = info_span.find('b')
+
+        if titulo_tag:
+            titulo = titulo_tag.text.strip()
+            valor = titulo_tag.find_next_sibling('br').next_sibling.strip()
+
+            if titulo in titulo_para_atributo:
+                atributo = titulo_para_atributo[titulo]
+                setattr(carro, atributo, valor)
+
+    carro.marca = "Honda"
     carro.ano = carro_ano
     carro.modelo = carro_versao
+    carro.foto = "Sem Foto"
 
     # Criando .CSV com os dados salvos!
     # salvar_dados_em_csv(carro)
-    print(carro)
+    lista_de_carros.append(carro)
+    print(lista_de_carros)
 
 
 def main():
-    urls = ['https://www.shopcar.com.br/fichatecnica.php?id=3655']  # Link de teste!
+    urls = ['https://www.shopcar.com.br/fichatecnica.php?id=3655',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=8070%7C0&ano=212']  # Link de teste!
 
     total_urls = len(urls)
     scrap_time = 0
@@ -188,7 +214,7 @@ def main():
         if scrap_time % 2 == 0 and scrap_time < total_urls:
             print("Waiting for 60 seconds...")
             time.sleep(60)  # Wait for 60 seconds every 2 scrapes
-
+    salvar_dados_em_csv(lista_de_carros, nome_arquivo)
     print("Scraping complete for all {} URLs.".format(total_urls))
 
 
