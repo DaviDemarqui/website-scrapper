@@ -7,11 +7,11 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
-
 # imports de bibliotecas
 
 lista_de_carros = []
 nome_arquivo = 'ficha_carros_database.csv'
+
 
 def salvar_dados_em_csv(lista_de_carros, nome_arquivo):
     with open(nome_arquivo, 'w', newline='') as csvfile:
@@ -30,7 +30,6 @@ def salvar_dados_em_csv(lista_de_carros, nome_arquivo):
 
             # Escreva a instrução SQL INSERT no arquivo CSV
             writer.writerow([insert_sql])
-
 
 
 # Configurando modelo carro
@@ -200,8 +199,55 @@ def escaralhando(url):
 
 
 def main():
-    urls = ['https://www.shopcar.com.br/fichatecnica.php?id=3655',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=8070%7C0&ano=212']  # Link de teste!
+    urls = ['https://www.shopcar.com.br/fichatecnica.php?modelo=12496%7C0&ano=738',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12496%7C0&ano=4238',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=14455%7C0&ano=4239',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=1809%7C0&ano=2583',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=1809%7C0&ano=2603',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=1809%7C0&ano=2584',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C1&ano=1669',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C0&ano=739',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C0&ano=3845',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C1&ano=3846',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7200%7C1&ano=2585',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7200%7C1&ano=2586',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=6954%7C0&ano=2587',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=6954%7C0&ano=2588',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12498%7C1&ano=740',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12498%7C1&ano=4240',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7133%7C0&ano=2589',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=6828%7C0&ano=2590',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2700%7C0&ano=2591',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=13433%7C1&ano=3151',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=13433%7C1&ano=4387',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12499%7C1&ano=741',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=12499%7C1&ano=4241',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=13093%7C1&ano=3403',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2592',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2594',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2593',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2598',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7203%7C1&ano=2595',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7203%7C1&ano=2596',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7203%7C1&ano=2599',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=9519%7C0&ano=2597',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=14526%7C0&ano=4388',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=1813%7C0&ano=2600',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=1813%7C0&ano=2602',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=1813%7C0&ano=2601',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7201%7C1&ano=2604',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7201%7C1&ano=2605',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2606',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2607',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2608',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2609',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7204%7C1&ano=2610',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7204%7C1&ano=2611',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=7204%7C1&ano=2612',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2699%7C0&ano=2613',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2699%7C0&ano=2614',
+            'https://www.shopcar.com.br/fichatecnica.php?modelo=2699%7C0&ano=2615',
+            ]  # Link de teste!
 
     total_urls = len(urls)
     scrap_time = 0
@@ -211,7 +257,7 @@ def main():
         escaralhando(url)
         scrap_time += 1
 
-        if scrap_time % 2 == 0 and scrap_time < total_urls:
+        if scrap_time % 15 == 0 and scrap_time < total_urls:
             print("Waiting for 60 seconds...")
             time.sleep(60)  # Wait for 60 seconds every 2 scrapes
     salvar_dados_em_csv(lista_de_carros, nome_arquivo)
