@@ -1,9 +1,7 @@
-import os
+import csv
 import random
 import time
-import csv
 
-import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
@@ -13,19 +11,36 @@ lista_de_carros = []
 nome_arquivo = 'ficha_carros_database.csv'
 
 
+def alternative_key(dictionary, key, alternate_key):
+    try:
+        return dictionary[key]
+    except KeyError:
+        try:
+            return dictionary[alternate_key]
+        except KeyError:
+            return "N/D"
+
+
 def salvar_dados_em_csv(lista_de_carros, nome_arquivo):
     with open(nome_arquivo, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
         # Escreva os dados dos carros com instruções SQL INSERT
         for carro in lista_de_carros:
-            insert_sql = ('INSERT INTO `monaco`.`tabela_carros`(`id`,`marca`,`modelo`,`ano`,`motor`,`tipo`,'
-                          f'`valvulas`,`alimentacao`,`posicao`,`combustivel`,`potencia_cv`,`cilindradas`,`torque`,'
-                          f'`direcao`,`tracao`,`transmissao`,`velocidade_max`,`_0_100`,`consumo_cidade`,'
-                          f'`consumo_estrada`,`suspensao_dianteira`,`suspensao_traseira`,`freio_dianteiro`,'
-                          f'`freio_traseiro`,`roda`,`pneu`,`comprimento`,`entre_eixos`,`altura`,`largura`,`peso`,'
-                          f'`carga_util`,`porta_malas`,`tanque`,`portas`,`foto`) VALUES(')
-            insert_sql += f"'{carro.id}', '{carro.marca}', '{carro.modelo}', '{carro.ano}', '{carro.motor}', '{carro.tipo}', '{carro.valvulas}', '{carro.alimentacao}', '{carro.posicao}', '{carro.combustivel}', '{carro.potencia_cv}', '{carro.cilindradas}', '{carro.torque}', '{carro.direcao}', '{carro.tracao}', '{carro.transmissao}', '{carro.velocidade_max}', '{carro._0_100}', '{carro.consumo_cidade}', '{carro.consumo_estrada}', '{carro.suspensao_dianteira}', '{carro.suspensao_traseira}', '{carro.freio_dianteiro}', '{carro.freio_traseiro}', '{carro.roda}', '{carro.pneu}', '{carro.comprimento}', '{carro.entre_eixos}', '{carro.altura}', '{carro.largura}', '{carro.peso}', '{carro.carga_util}', '{carro.porta_malas}', '{carro.tanque}', '{carro.portas}', '{carro.foto}'"
+            insert_sql = (
+                'INSERT INTO `karangoo`.`ficha_carros` (`marca`, `modelo`, `ano`, `combustivel`, `configuracao`, '
+                '`garantia`, `geracao`, `lugares`, `plataforma`, `portas`, `porte`, `procedencia`, '
+                '`aceleracao_0_100`, `velocidade_maxima`, `acoplamento`, `cambio`, `codigo_cambio`, '
+                '`quantidade_marchas`, `tracao`, `alimentacao`, `aspiracao`, `cilindros`, '
+                '`codigo_motor`, `comando_valvulas`, `curso_pistao`, `diametro_cilindro`, `disposicao`, `instalacao`, '
+                '`peso_potencia`, `peso_torque`, `potencia_especifica`, `potencia_G`, `potencia_A`, `potencia_D`, `razao_compressao`, '
+                '`torque_especifico`, `torque_A`, `torque_G`, `torque_D`, `tuchos`, `valvulas_por_cilindro`, `variacao_comando`, '
+                '`altura`, `bitola_dianteira`, `bitola_traseira`, `carga_util`, `comprimento`, `distancia_eixos`, '
+                '`largura`, `peso`, `porta_malas`, `tanque_combustivel`, `freios_dianteiros`, `freios_traseiros`, '
+                '`assistencia`, `suspensao_dianteira`, `elemento_elastico`, `suspensao_traseira`, '
+                '`consumo_rodoviario_A`, `consumo_rodoviario_G`, `consumo_rodoviario_D`, `consumo_urbano_A`, '
+                '`consumo_urbano_G`, `consumo_urbano_D`) VALUES(')
+            insert_sql += f"'{carro.marca}', '{carro.modelo}', '{carro.ano}', '{carro.combustivel}', '{carro.configuracao}', '{carro.garantia}', '{carro.geracao}', '{carro.lugares}', '{carro.plataforma}', '{carro.portas}', '{carro.porte}', '{carro.procedencia}', '{carro.aceleracao_0_100}', '{carro.velocidade_maxima}', '{carro.acoplamento}', '{carro.cambio}', '{carro.codigo_cambio}', '{carro.quantidade_marchas}', '{carro.tracao}', '{carro.alimentacao}', '{carro.aspiracao}', '{carro.cilindros}', '{carro.codigo_motor}', '{carro.comando_valvulas}', '{carro.curso_pistao}', '{carro.diametro_cilindro}', '{carro.disposicao}', '{carro.instalacao}', '{carro.peso_potencia}', '{carro.peso_torque}', '{carro.potencia_especifica}', '{carro.potencia_G}', '{carro.potencia_A}', '{carro.potencia_D}', '{carro.razao_compressao}', '{carro.torque_especifico}', '{carro.potencia_A}', '{carro.potencia_D}', '{carro.potencia_G}', '{carro.tuchos}', '{carro.valvulas_por_cilindro}', '{carro.variacao_comando}', '{carro.altura}', '{carro.bitola_dianteira}', '{carro.bitola_traseira}', '{carro.carga_util}', '{carro.comprimento}', '{carro.distancia_eixos}', '{carro.largura}', '{carro.peso}', '{carro.porta_malas}', '{carro.tanque_combustivel}', '{carro.freios_dianteiros}', '{carro.freios_traseiros}', '{carro.assistencia}', '{carro.suspensao_dianteira}', '{carro.elemento_elastico}', '{carro.suspensao_traseira}', '{carro.consumo_rodoviario_A}', '{carro.consumo_rodoviario_G}', '{carro.consumo_rodoviario_D}', '{carro.consumo_urbano_A}', '{carro.consumo_urbano_G}', '{carro.consumo_urbano_D}'"
             insert_sql += ');'
 
             # Escreva a instrução SQL INSERT no arquivo CSV
@@ -33,54 +48,80 @@ def salvar_dados_em_csv(lista_de_carros, nome_arquivo):
 
 
 # Configurando modelo carro
-class FichaTecnicaCarro:
-    def __init__(self, id=0, marca='', modelo='', ano='0', motor='', tipo='',
-                 valvulas='', alimentacao='', posicao='', combustivel='',
-                 potencia_cv='0', cilindradas='0', torque='0',
-                 direcao='', tracao='', transmissao='',
-                 velocidade_max='0', _0_100='0', consumo_cidade='0',
-                 consumo_estrada='0', suspensao_dianteira='',
-                 suspensao_traseira='', freio_dianteiro='',
-                 freio_traseiro='', roda='', pneu='', comprimento='0',
-                 entre_eixos='0', altura='0', largura='0', peso='0',
-                 carga_util='0', porta_malas='0', tanque='0',
-                 portas='0', foto=''):
-        self.id = id
+class Carro:
+    def __init__(self, marca, modelo, ano, combustivel, configuracao, garantia, geracao, lugares, plataforma, portas,
+                 porte, procedencia, aceleracao_0_100, velocidade_maxima, acoplamento, cambio, codigo_cambio,
+                 quantidade_marchas, tracao, alimentacao, aspiracao, cilindros, codigo_motor,
+                 comando_valvulas, curso_pistao, diametro_cilindro, disposicao, instalacao, peso_potencia, peso_torque,
+                 potencia_especifica, potencia_G, potencia_A, potencia_D, razao_compressao, torque_especifico, torque_A, torque_G, torque_D, tuchos, valvulas_por_cilindro,
+                 variacao_comando, altura, bitola_dianteira, bitola_traseira, carga_util, comprimento, distancia_eixos,
+                 largura, peso, porta_malas, tanque_combustivel, freios_dianteiros, freios_traseiros, assistencia,
+                 suspensao_dianteira, elemento_elastico, suspensao_traseira, consumo_rodoviario_A,
+                 consumo_rodoviario_G, consumo_rodoviario_D, consumo_urbano_A, consumo_urbano_G, consumo_urbano_D):
         self.marca = marca
-        self.modelo = modelo
+        self.modelo = modelo[len(marca) + 1:]
         self.ano = ano
-        self.motor = motor
-        self.tipo = tipo
-        self.valvulas = valvulas
-        self.alimentacao = alimentacao
-        self.posicao = posicao
         self.combustivel = combustivel
-        self.potencia_cv = potencia_cv
-        self.cilindradas = cilindradas
-        self.torque = torque
-        self.direcao = direcao
+        self.configuracao = configuracao
+        self.garantia = garantia
+        self.geracao = geracao
+        self.lugares = lugares
+        self.plataforma = plataforma
+        self.portas = portas
+        self.porte = porte
+        self.procedencia = procedencia
+        self.aceleracao_0_100 = aceleracao_0_100
+        self.velocidade_maxima = velocidade_maxima
+        self.acoplamento = acoplamento
+        self.cambio = cambio
+        self.codigo_cambio = codigo_cambio
+        self.quantidade_marchas = quantidade_marchas
         self.tracao = tracao
-        self.transmissao = transmissao
-        self.velocidade_max = velocidade_max
-        self._0_100 = _0_100
-        self.consumo_cidade = consumo_cidade
-        self.consumo_estrada = consumo_estrada
-        self.suspensao_dianteira = suspensao_dianteira
-        self.suspensao_traseira = suspensao_traseira
-        self.freio_dianteiro = freio_dianteiro
-        self.freio_traseiro = freio_traseiro
-        self.roda = roda
-        self.pneu = pneu
-        self.comprimento = comprimento
-        self.entre_eixos = entre_eixos
+        self.alimentacao = alimentacao
+        self.aspiracao = aspiracao
+        self.cilindros = cilindros
+        self.codigo_motor = codigo_motor
+        self.comando_valvulas = comando_valvulas
+        self.curso_pistao = curso_pistao
+        self.diametro_cilindro = diametro_cilindro
+        self.disposicao = disposicao
+        self.instalacao = instalacao
+        self.peso_potencia = peso_potencia
+        self.peso_torque = peso_torque
+        self.potencia_especifica = potencia_especifica
+        self.potencia_A = potencia_A
+        self.potencia_G = potencia_G
+        self.potencia_D = potencia_D
+        self.razao_compressao = razao_compressao
+        self.torque_especifico = torque_especifico
+        self.torque_A = torque_A
+        self.torque_G = torque_G
+        self.torque_D = torque_D
+        self.tuchos = tuchos
+        self.valvulas_por_cilindro = valvulas_por_cilindro
+        self.variacao_comando = variacao_comando
         self.altura = altura
+        self.bitola_dianteira = bitola_dianteira
+        self.bitola_traseira = bitola_traseira
+        self.carga_util = carga_util
+        self.comprimento = comprimento
+        self.distancia_eixos = distancia_eixos
         self.largura = largura
         self.peso = peso
-        self.carga_util = carga_util
         self.porta_malas = porta_malas
-        self.tanque = tanque
-        self.portas = portas
-        self.foto = foto
+        self.tanque_combustivel = tanque_combustivel
+        self.freios_dianteiros = freios_dianteiros
+        self.freios_traseiros = freios_traseiros
+        self.assistencia = assistencia
+        self.suspensao_dianteira = suspensao_dianteira
+        self.elemento_elastico = elemento_elastico
+        self.suspensao_traseira = suspensao_traseira
+        self.consumo_rodoviario_A = consumo_rodoviario_A
+        self.consumo_rodoviario_G = consumo_rodoviario_G
+        self.consumo_rodoviario_D = consumo_rodoviario_D
+        self.consumo_urbano_A = consumo_urbano_A
+        self.consumo_urbano_G = consumo_urbano_G
+        self.consumo_urbano_D = consumo_urbano_D
 
 
 #  Botando pra escaralhar
@@ -109,145 +150,182 @@ def escaralhando(url):
     dr.get(url)
     response = dr.page_source
     soup = BeautifulSoup(response, 'html.parser')
+    captcha = soup.find('div', class_='g-recaptcha')
 
-    select_element_ano = soup.find('select', id='ano')
-    select_element_versao = soup.find('select', id='versao')
+    if captcha:
+        time.sleep(25)
+        dr.get(url)
+        response = dr.page_source
+        soup = BeautifulSoup(response, 'html.parser')
 
-    if select_element_ano and select_element_versao:
-        selected_option_ano = select_element_ano.find('option', selected=True)
-        selected_option_versao = select_element_versao.find('option', selected=True)
+    titulo_carro_element = soup.find('h1', class_='title-pousada title-bottom-border title-underblock custom')
 
-        if selected_option_ano and selected_option_versao:
-            carro_ano = selected_option_ano.text.strip()
-            carro_versao = selected_option_versao.text.strip()
+    if titulo_carro_element:
+        titulo_carro = titulo_carro_element.get_text(strip=True)
+    else:
 
-    titulo_para_atributo = {
-        'Ano': 'ano',
-        'Motorização': 'motor',
-        'Tipo': 'tipo',
-        'Valvulas': 'valvulas',
-        'Alimentação': 'alimentacao',
-        'Posição': 'posicao',
-        'Combustível': 'combustivel',
-        'Potência (cv)': 'potencia_cv',
-        'Cilindradas (cm3)': 'cilindradas',
-        'Torque (Kgf.m)': 'torque',
-        'Direção': 'direcao',
-        'Tração': 'tracao',
-        'Transmissão': 'transmissao',
-        'Velocidade máx (Km/h)': 'velocidade_max',
-        'Tempo 0-100Km/h': '_0_100',
-        'Consumo cidade (Km/L)': 'consumo_cidade',
-        'Consumo estrada (Km/L)': 'consumo_estrada',
-        'Suspensão dianteira': 'suspensao_dianteira',
-        'Suspensão traseira': 'suspensao_traseira',
-        'Freio dianteiro': 'freio_dianteiro',
-        'Freio traseiro': 'freio_traseiro',
-        'Roda': 'roda',
-        'Pneu': 'pneu',
-        'COMPRIMENTO': 'comprimento',
-        'ENTRE-EIXOS': 'entre_eixos',
-        'ALTURA': 'altura',
-        'LARGURA': 'largura',
-        'PESO EM ORDEM DE MARCHA': 'peso',
-        'Carga Útil': 'carga_util',
-        'PORTA-MALAS': 'porta_malas',
-        'TANQUE': 'tanque',
-        'Portas': 'portas',
-        'Foto': 'foto',
-    }
+        titulo_carro_element = soup.find('h1', class_='title-pousada title-bottom-border title-underblock custom')
+        titulo_carro = titulo_carro_element.get_text(strip=True)
 
-    carro = FichaTecnicaCarro()
+    # Dicionario de pares de valores
+    valores = {}
+    col_esq_elements = soup.find_all('div', class_='colEsq')
+    for col_esq in col_esq_elements:
+        chave = col_esq.get_text(strip=True)
 
-    tr_tags = soup.find_all('tr')
+        valor = col_esq.find_next_sibling('div', class_='colDir').get_text(strip=True)
 
-    for tr in tr_tags:
-        td_tags = tr.find_all('td')
-        if len(td_tags) >= 2:
-            titulo = td_tags[0].text.strip()
-            valor = td_tags[1].text.strip()
+        # Armazenando o par chave-valor no dicionario
+        valores[chave] = valor
 
-            # Verificando se to titulo esta mapeado para um atribuido do objeto
-            if titulo in titulo_para_atributo:
-                atributo = titulo_para_atributo[titulo]
-                setattr(carro, atributo, valor)
-        print(carro)
+    carro = Carro(
+        marca='Chevrolet',
+        modelo=titulo_carro,  # Nome do veiculo
+        ano=alternative_key(valores, 'Ano:', 'Ano'),
+        combustivel=alternative_key(valores, 'Combustível:', 'Combustível'),
+        configuracao=alternative_key(valores, 'Configuração:', 'Configuração'),
+        garantia=alternative_key(valores, 'Garantia:', 'Garantia'),
+        geracao=alternative_key(valores, 'Geração:', 'Geração'),
+        lugares=alternative_key(valores, 'Lugares:', 'Lugares'),
+        plataforma=alternative_key(valores, 'Plataforma:', 'Plataforma'),
+        portas=alternative_key(valores, 'Portas:', 'Portas'),
+        porte=alternative_key(valores, 'Porte:', 'Porte'),
+        procedencia=alternative_key(valores, 'Procedência:', 'Procedência'),
+        aceleracao_0_100=alternative_key(valores, 'Aceleração 0-100 km/h:', 'Aceleração 0-100 km/h'),
+        velocidade_maxima=alternative_key(valores, 'Velocidade máxima:', 'Velocidade máxima'),
+        acoplamento=alternative_key(valores, 'Acoplamento:', 'Acoplamento'),
+        cambio=alternative_key(valores, 'Câmbio:', 'Câmbio'),
+        codigo_cambio=alternative_key(valores, 'Código do câmbio:', 'Código do câmbio'),
+        quantidade_marchas=alternative_key(valores, 'Quantidade de marchas:', 'Marchas:'),
+        tracao=alternative_key(valores, 'Tração:', 'Tração'),
+        alimentacao=alternative_key(valores, 'Alimentação:', 'Alimentação'),
+        aspiracao=alternative_key(valores, 'Aspiração:', 'Aspiração'),
+        cilindros=alternative_key(valores, 'Cilindros:', 'Cilindros'),
+        codigo_motor=alternative_key(valores, 'Código do motor:', 'Código do motor'),
+        comando_valvulas=alternative_key(valores, 'Comando de válvulas:', 'Comando de válvulas'),
+        curso_pistao=alternative_key(valores, 'Curso do pistão:', 'Curso do pistão'),
+        diametro_cilindro=alternative_key(valores, 'Diâmetro do cilindro:', 'Diâmetro do cilindro'),
+        disposicao=alternative_key(valores, 'Disposição:', 'Disposição'),
+        instalacao=alternative_key(valores, 'Instalação:', 'Instalação'),
+        peso_potencia=alternative_key(valores, 'Peso/potência:', 'Peso/potência'),
+        peso_torque=alternative_key(valores, 'Peso/torque:', 'Peso/torque'),
+        potencia_especifica=alternative_key(valores, 'Potência específica:', 'Potência específica'),
+        potencia_G=alternative_key(valores, 'Potência máxima (G):', 'Potência (G):'),
+        potencia_A=alternative_key(valores, 'Potência máxima (A):', 'Potência (A):'),
+        potencia_D=alternative_key(valores, 'Potência máxima:', 'Potência máxima'),
+        razao_compressao=alternative_key(valores, 'Razão de compressão:', 'Razão de compressão'),
+        torque_especifico=alternative_key(valores, 'Torque específico:', 'Torque específico'),
+        torque_A=alternative_key(valores, 'Torque máximo (A):', 'Torque máximo (A)'),
+        torque_G=alternative_key(valores, 'Torque máximo (G):', 'Torque máximo (G)'),
+        torque_D=alternative_key(valores, 'Torque máximo:', 'Torque máximo'),
+        tuchos=alternative_key(valores, 'Tuchos:', 'Tuchos'),
+        valvulas_por_cilindro=alternative_key(valores, 'Válvulas por cilindro:', 'Válvulas por cilindro'),
+        variacao_comando=alternative_key(valores, 'Variação do comando:', 'Variação do comando'),
+        altura=alternative_key(valores, 'Altura:', 'Altura'),
+        bitola_dianteira=alternative_key(valores, 'Bitola dianteira:', 'Bitola dianteira'),
+        bitola_traseira=alternative_key(valores, 'Bitola traseira:', 'Bitola traseira'),
+        carga_util=alternative_key(valores, 'Carga útil:', 'Carga útil'),
+        comprimento=alternative_key(valores, 'Comprimento:', 'Comprimento'),
+        distancia_eixos=alternative_key(valores, 'Distância entre-eixos:', 'Distância entre-eixos'),
+        largura=alternative_key(valores, 'Largura:', 'Largura'),
+        peso=alternative_key(valores, 'Peso:', 'Peso'),
+        porta_malas=alternative_key(valores, 'Porta-malas:', 'Porta-malas'),
+        tanque_combustivel=alternative_key(valores, 'Tanque de combustível:', 'Tanque de combustível'),
+        freios_dianteiros=alternative_key(valores, 'Dianteiros:', 'Dianteiros'),
+        freios_traseiros=alternative_key(valores, 'Traseiros:', 'Traseiros'),
+        assistencia=alternative_key(valores, 'Assistência:', 'Assistência'),
+        suspensao_dianteira=alternative_key(valores, 'Dianteira:', 'Dianteira'),
+        elemento_elastico=alternative_key(valores, 'Elemento elástico:', 'Elemento elástico'),
+        suspensao_traseira=alternative_key(valores, 'Traseira:', 'Traseira'),
+        consumo_rodoviario_G=alternative_key(valores, 'Rodoviário (G):', 'Rodoviário (G)'),
+        consumo_urbano_G=alternative_key(valores, 'Urbano (G):', 'Urbano (G)'),
+        consumo_rodoviario_A=alternative_key(valores, 'Rodoviário (A):', 'Rodoviário (A)'),
+        consumo_urbano_A=alternative_key(valores, 'Urbano (A):', 'Urbano (A)'),
+        consumo_rodoviario_D=alternative_key(valores, 'Rodoviário (D):', 'Rodoviário (D)'),
+        consumo_urbano_D=alternative_key(valores, 'Urbano (D):', 'Urbano (D)'),
+    )
 
-    # Pegando valor das dimensões do veiculo
-    info_spans = soup.find_all('span', class_='info')
+    # session.add(carro)
+    # session.commit()
+    # session.close()
 
-    for info_span in info_spans:
-        titulo_tag = info_span.find('b')
-
-        if titulo_tag:
-            titulo = titulo_tag.text.strip()
-            valor = titulo_tag.find_next_sibling('br').next_sibling.strip()
-
-            if titulo in titulo_para_atributo:
-                atributo = titulo_para_atributo[titulo]
-                setattr(carro, atributo, valor)
-
-    carro.marca = "Honda"
-    carro.ano = carro_ano
-    carro.modelo = carro_versao
-    carro.foto = "Sem Foto"
+    # carro.marca = "Honda"
+    # carro.ano = carro_ano
+    # carro.modelo = carro_versao
+    # carro.foto = "Sem Foto"
 
     # Criando .CSV com os dados salvos!
     # salvar_dados_em_csv(carro)
     lista_de_carros.append(carro)
+    salvar_dados_em_csv(lista_de_carros, nome_arquivo)
+    print(carro)
     print(lista_de_carros)
 
 
 def main():
-    urls = ['https://www.shopcar.com.br/fichatecnica.php?modelo=12496%7C0&ano=738',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12496%7C0&ano=4238',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=14455%7C0&ano=4239',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=1809%7C0&ano=2583',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=1809%7C0&ano=2603',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=1809%7C0&ano=2584',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C1&ano=1669',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C0&ano=739',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C0&ano=3845',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12497%7C1&ano=3846',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7200%7C1&ano=2585',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7200%7C1&ano=2586',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=6954%7C0&ano=2587',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=6954%7C0&ano=2588',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12498%7C1&ano=740',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12498%7C1&ano=4240',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7133%7C0&ano=2589',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=6828%7C0&ano=2590',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2700%7C0&ano=2591',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=13433%7C1&ano=3151',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=13433%7C1&ano=4387',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12499%7C1&ano=741',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=12499%7C1&ano=4241',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=13093%7C1&ano=3403',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2592',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2594',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2593',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=3216%7C0&ano=2598',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7203%7C1&ano=2595',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7203%7C1&ano=2596',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7203%7C1&ano=2599',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=9519%7C0&ano=2597',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=14526%7C0&ano=4388',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=1813%7C0&ano=2600',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=1813%7C0&ano=2602',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=1813%7C0&ano=2601',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7201%7C1&ano=2604',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7201%7C1&ano=2605',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2606',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2607',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2608',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2698%7C0&ano=2609',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7204%7C1&ano=2610',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7204%7C1&ano=2611',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=7204%7C1&ano=2612',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2699%7C0&ano=2613',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2699%7C0&ano=2614',
-            'https://www.shopcar.com.br/fichatecnica.php?modelo=2699%7C0&ano=2615',
-            ]  # Link de teste!
+    urls = [
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-rs-1-0-turbo-at-2024',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-premier-1-0-turbo-at-2024',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-at-2024',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-2024',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-2024',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-turbo-at-2024',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-2024',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-rs-1-0-turbo-at-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-premier-1-0-turbo-at-2023-flex',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-at-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-at-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-turbo-at-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-2023',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-rs-1-0-turbo-at-2022',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-premier-1-0-turbo-at-2022-flex',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-at-2022',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-2022',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-turbo-at-2022',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-2022',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-rs-1-0-turbo-at-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-premier-1-0-turbo-at-2021-flex',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-at-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-at-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-at-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-turbo-at-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-2021',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-premier-1-0-turbo-at-2020-flex',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-at-2020',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-0-turbo-2020',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-at-2020',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-turbo-2020',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-2020',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-turbo-at-2020',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-1-0-2020',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-4-at-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-4-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-4-at-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-4-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-joy-1-0-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-effect-1-4-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-advantage-1-4-at-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-activ-1-4-at-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-activ-1-4-2019',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-4-at-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-ltz-1-4-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-4-at-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-4-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-lt-1-0-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-joy-1-0-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-effect-1-4-2018-flex',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-effect-1-4-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-advantage-1-4-at-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-activ-1-4-at-2018',
+        'https://www.fichacompleta.com.br/carros/chevrolet/onix-activ-1-4-2018',
+    ]  # Link de teste!
 
     total_urls = len(urls)
     scrap_time = 0
