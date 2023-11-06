@@ -194,7 +194,8 @@ def escaralhando(url):
     if titulo_carro_element:
         titulo_carro = titulo_carro_element.get_text(strip=True)
     else:
-
+        response = dr.page_source
+        soup = BeautifulSoup(response, 'html.parser')
         titulo_carro_element = soup.find('h1', class_='title-pousada title-bottom-border title-underblock custom')
         titulo_carro = titulo_carro_element.get_text(strip=True)
 
@@ -210,7 +211,7 @@ def escaralhando(url):
         valores[chave] = valor
 
     carro = Carro(
-        marca='Jeep', # SEMPRE LEMBRE DE MUDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR
+        marca='Honda', # SEMPRE LEMBRE DE MUDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR
         modelo=titulo_carro,  # Nome do veiculo
         ano=alternative_key(valores, 'Ano:', 'Ano', 'ano'),
         combustivel=alternative_key(valores, 'Combustível:', 'Combustível', 'Combustivel:'),
@@ -286,17 +287,7 @@ def escaralhando(url):
 
     atualizar_campos_carro(carro)
     atualizar_campos_potencia(carro)
-    # session.add(carro)
-    # session.commit()
-    # session.close()
 
-    # carro.marca = "Honda"
-    # carro.ano = carro_ano
-    # carro.modelo = carro_versao
-    # carro.foto = "Sem Foto"
-
-    # Criando .CSV com os dados salvos!
-    # salvar_dados_em_csv(carro)
     lista_de_carros.append(carro)
     salvar_dados_em_csv(lista_de_carros, nome_arquivo)
     print(carro)
@@ -305,7 +296,54 @@ def escaralhando(url):
 
 def main():
     urls = [
-
+    "https://www.fichacompleta.com.br/carros/honda/civic-exs-1-8-at-2012",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxl-1-8-2012",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxl-1-8-at-2012",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-2012",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-at-2012",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exs-1-8-at-2013",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxl-1-8-2013",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxl-1-8-at-2013",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-2013",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-at-2013",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exr-2-0-2014",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxr-2-0-2014",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-2014",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-at-2014",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxr-2-0-2015",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-2015",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-at-2015",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exr-2-0-2016",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxr-2-0-2016",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-2016",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lxs-1-8-at-2016",
+    "https://www.fichacompleta.com.br/carros/honda/civic-ex-2-0-at-2017",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exl-2-0-at-2017",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-2017",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-at-2017",
+    "https://www.fichacompleta.com.br/carros/honda/civic-touring-1-5-turbo-at-2017",
+    "https://www.fichacompleta.com.br/carros/honda/civic-ex-2-0-at-2018",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exl-2-0-at-2018",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-2018",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-at-2018",
+    "https://www.fichacompleta.com.br/carros/honda/civic-touring-1-5-turbo-at-2018",
+    "https://www.fichacompleta.com.br/carros/honda/civic-ex-2-0-at-2019",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exl-2-0-at-2019",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-2019",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-at-2019",
+    "https://www.fichacompleta.com.br/carros/honda/civic-touring-1-5-turbo-at-2019",
+    "https://www.fichacompleta.com.br/carros/honda/civic-ex-2-0-at-2020",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exl-2-0-at-2020",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lx-2-0-at-2020",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-at-2020",
+    "https://www.fichacompleta.com.br/carros/honda/civic-touring-1-5-turbo-at-2020",
+    "https://www.fichacompleta.com.br/carros/honda/civic-ex-2-0-at-2021",
+    "https://www.fichacompleta.com.br/carros/honda/civic-exl-2-0-at-2021",
+    "https://www.fichacompleta.com.br/carros/honda/civic-lx-2-0-at-2021",
+    "https://www.fichacompleta.com.br/carros/honda/civic-sport-2-0-at-2021",
+    "https://www.fichacompleta.com.br/carros/honda/civic-touring-1-5-turbo-at-2021",
+    "https://www.fichacompleta.com.br/carros/honda/civic-hybrid-2-0-2023",
+    "https://www.fichacompleta.com.br/carros/honda/civic-hybrid-2-0-2024"
     ]  # Link de teste!
 
     total_urls = len(urls)
